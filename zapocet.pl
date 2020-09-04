@@ -1,10 +1,7 @@
-
 % sudoku(?Rows) 
 sudoku(Rows) :-
-        % length(Rows, Length),
-        % first(Rows, F),
-        % all_same_lenght(F, Rows, F),
-        % prints(Rows),
+        first(Rows, F), 
+        all_same_lenght(F, Rows, F), % checks the sudoku if squared 
         fillWithPosRows(Rows, NRows),
         iterate(NRows, Result, 0),
         prints(Result).
@@ -12,39 +9,30 @@ sudoku(Rows) :-
 
 
 iterate(Rows, Result, N):- 
-        % print("new row:"), nl(),
-        % prints(Rows), 
         (all_atomic(Rows), Rows = Result, !);
-        % print("checked atomicity"), nl(),
         all_distinct2D(Rows, NRows),
         transpose(NRows, Columns),
-        % print("dis and trans"), nl(),
         all_distinct2D(Columns, NColumns),
-        % print("dis2"), nl(),
-        % prints(NColumns), 
         NColumns = [As,Bs,Cs,Ds,Es,Fs,Gs,Hs,Is],
-        % print("NColumns"),
         blocks(As, Bs, Cs, Ar, Br, Cr), % first 3 rows
         blocks(Ds, Es, Fs, Dr, Er, Fr),
         blocks(Gs, Hs, Is, Gr, Hr, Ir),
         transpose([Ar,Br,Cr,Dr,Er,Fr,Gr,Hr,Ir], Res),
-        % iterate(Res, Result, 0), !.
-        % prints(Res),
-        % print("Entering row = res"),
         next_iteration(Rows, Res, Result, N).
 
 next_iteration(Rows, Res, Result, _):- Res \= Rows, iterate(Res, Result, 0), !.
-next_iteration(_, _, Result, N):- N >= 2, Result = [], !.
+next_iteration(_, _, Result, N):- N >= 8, Result = [], !.
 next_iteration(_, Res, Result, N):- randomAtomize(Res, R), Nn is N+1, iterate(R, Result, Nn), !.
         
-
 
 blocks([], [], [], [], [], []):- !.
 blocks([N1,N2,N3|Ns1], [N4,N5,N6|Ns2], [N7,N8,N9|Ns3], [R1,R2,R3|Rs1], [R4,R5,R6|Rs2], [R7,R8,R9|Rs3]) :-
         all_distinct([N1,N2,N3,N4,N5,N6,N7,N8,N9], [R1,R2,R3,R4,R5,R6,R7,R8,R9]),
         blocks(Ns1, Ns2, Ns3, Rs1, Rs2, Rs3).
 
-%%% nondeterministic part of code !!!
+%%%
+%%% NONDeterministic part of code !!!
+%%%
 randomAtomize(Res, R):- member(X, [1,2,3,4,5,6,7,8,9]), randomAtomize(Res, R, X).
 randomAtomize([R|Rs], [R|RRs], X):- X > 1, Xs is X-1, randomAtomize(Rs, RRs, Xs).
 randomAtomize([R|Rs], [NR|Rs], 1):- member(X, [1,2,3,4,5,6,7,8,9]), randomAtomizeRow(R,NR,X).
@@ -52,7 +40,6 @@ randomAtomize([R|Rs], [NR|Rs], 1):- member(X, [1,2,3,4,5,6,7,8,9]), randomAtomiz
 % randomAtomizeRow([R|_], _, 1):- atomic(R), fail, !. %% if atomic then fail and look for list
 randomAtomizeRow([R|Rs], [R|RRs], X):- X > 1, Xs is X-1, randomAtomizeRow(Rs, RRs, Xs).
 randomAtomizeRow([R|Rs], [NR|Rs], 1):- \+atomic(R), member(NR, R).
-
 %%% !!!
 
 all_atomic([]).
@@ -111,7 +98,6 @@ atomize([X|Xs], [X|Os]):- atomize(Xs, Os).
 distin([X]):- X\= [], !.
 distin([X|Xs]):- X \= [], atomic(X), \+member(X,Xs), distin(Xs), !.
 distin([X|Xs]):- \+atomic(X), distin(Xs).
-
 %%%%
 %%%% END OF MAIN LOGIC 
 %%%%
@@ -161,19 +147,7 @@ prints([X1, X2, X3, X4, X5, X6, X7, X8, X9]):-
         print(X8), sum_list(X8, SX8), print(SX8), nl(),
         print(X9), sum_list(X9, SX9), print(SX9), nl(),nl().
 
-
-/* 
-        sudoku([[1,_,_,_,_,_,_,_,_],
-        [_,_,2,7,4,_,_,_,_],
-        [_,_,_,5,_,_,_,_,4],
-        [_,3,_,_,_,_,_,_,_],
-        [7,5,_,_,_,_,_,_,_],
-        [_,_,_,_,_,9,6,_,_],
-        [_,4,_,_,_,6,_,_,_],
-        [_,_,_,_,_,_,_,7,1],
-        [_,_,_,_,_,1,_,3,_]]).
-        */
-        
+ 
 
 problem(0):- sudoku([
         [8,6,3,9,2,5,7,4,1],
@@ -210,7 +184,7 @@ problem(2) :- sudoku([
         [_,9,3,1,_,_,_,6,_],
         [_,_,7,_,6,_,5,_,_]]).
 
-%problem 3
+%problem 3 non solvable in normal time 
 problem(3) :- sudoku([
         [1,_,_,_,_,_,_,_,_],
         [_,_,2,7,4,_,_,_,_],
