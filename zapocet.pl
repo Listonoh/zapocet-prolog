@@ -4,16 +4,16 @@ sudoku(Rows) :-
         % length(Rows, Length),
         % first(Rows, F),
         % all_same_lenght(F, Rows, F),
-        % tiskni(Rows),
+        % prints(Rows),
         fillWithPosRows(Rows, NRows),
         iterate(NRows, Result, 0),
-        tiskni(Result).
+        prints(Result).
 
 
 
 iterate(Rows, Result, N):- 
         % print("new row:"), nl(),
-        % tiskni(Rows), 
+        % prints(Rows), 
         (all_atomic(Rows), Rows = Result, !);
         % print("checked atomicity"), nl(),
         all_distinct2D(Rows, NRows),
@@ -21,7 +21,7 @@ iterate(Rows, Result, N):-
         % print("dis and trans"), nl(),
         all_distinct2D(Columns, NColumns),
         % print("dis2"), nl(),
-        % tiskni(NColumns), 
+        % prints(NColumns), 
         NColumns = [As,Bs,Cs,Ds,Es,Fs,Gs,Hs,Is],
         % print("NColumns"),
         blocks(As, Bs, Cs, Ar, Br, Cr), % first 3 rows
@@ -29,12 +29,12 @@ iterate(Rows, Result, N):-
         blocks(Gs, Hs, Is, Gr, Hr, Ir),
         transpose([Ar,Br,Cr,Dr,Er,Fr,Gr,Hr,Ir], Res),
         % iterate(Res, Result, 0), !.
-        % tiskni(Res),
+        % prints(Res),
         % print("Entering row = res"),
         next_iteration(Rows, Res, Result, N).
 
 next_iteration(Rows, Res, Result, _):- Res \= Rows, iterate(Res, Result, 0), !.
-next_iteration(_, _, Result, N):- N >= 10, Result = [], !.
+next_iteration(_, _, Result, N):- N >= 2, Result = [], !.
 next_iteration(_, Res, Result, N):- randomAtomize(Res, R), Nn is N+1, iterate(R, Result, Nn), !.
         
 
@@ -87,16 +87,18 @@ get_atomic([], []):- !.
 get_atomic([X|Xs], [X|Ys]):- atomic(X), get_atomic(Xs, Ys), !.
 get_atomic([_|Xs], Ys):- get_atomic(Xs, Ys).
 
+% take each list and delete in them all Atoms
 delete_all(_,[],_):- !.
 delete_all([], _, []):- !.
 delete_all(I, _,I):- atomic(I), !.
 delete_all([I|Is], Atoms, [O|Os]):- delete_elements(I, Atoms, O), delete_all(Is, Atoms, Os).
 
+% in list delete all Atoms
 delete_elements(I, [], I):- !.
 delete_elements(I, _, I):- atomic(I), !.
 delete_elements(I, [A|As], O):- delete_elements(I, As, Os), delete(Os, A, O).
 
-% transform [X] to X ... from list to atom
+% transform [1,2,[X],...] to [1,2,X,...] so itsimplifies list to atom
 atomize([], []).
 atomize([X], [X]):- atomic(X), !.
 atomize([X], [Xh]):- length(X, 1), first(X, Xh), !.
@@ -105,6 +107,7 @@ atomize([X|Xs], [X|Os]):- atomic(X), atomize(Xs, Os), !.
 atomize([[X]|Xs], [X|Os]):- atomize(Xs, Os), !.
 atomize([X|Xs], [X|Os]):- atomize(Xs, Os).
 
+% fails when there are 2 same atoms in list or there is empty list []
 distin([X]):- X\= [], !.
 distin([X|Xs]):- X \= [], atomic(X), \+member(X,Xs), distin(Xs), !.
 distin([X|Xs]):- \+atomic(X), distin(Xs).
@@ -146,7 +149,7 @@ lists_firsts_rests([[F|Os]|Rest], [F|Fs], [Os|Oss]) :-
 %%% 
 %%% 
 
-tiskni([X1, X2, X3, X4, X5, X6, X7, X8, X9]):-
+prints([X1, X2, X3, X4, X5, X6, X7, X8, X9]):-
         write('Solved sudoku: '), nl(),
         print(X1), sum_list(X1, SX1), print(SX1), nl(),
         print(X2), sum_list(X2, SX2), print(SX2), nl(),
@@ -168,7 +171,7 @@ tiskni([X1, X2, X3, X4, X5, X6, X7, X8, X9]):-
         [_,_,_,_,_,9,6,_,_],
         [_,4,_,_,_,6,_,_,_],
         [_,_,_,_,_,_,_,7,1],
-        [_,_,_,_,_,1,_,3,_]],R).
+        [_,_,_,_,_,1,_,3,_]]).
         */
         
 
